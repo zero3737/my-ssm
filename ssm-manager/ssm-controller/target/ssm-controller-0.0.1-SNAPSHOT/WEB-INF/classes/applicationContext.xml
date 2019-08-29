@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xmlns="http://www.springframework.org/schema/beans"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd">  
+	
+	<!-- 配置注解扫描器 -->
+	<context:component-scan base-package="top.zero3737">
+		<!-- 排除 Servlet 层 -->
+    	<context:exclude-filter type="regex" expression="top.zero3737.controller.*" />
+	</context:component-scan>
+	
+	<!-- 增加对事务的支持 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	<!-- 加载 db.properties 文件 -->
+	<!-- <context:property-placeholder location="classpath:db.properties"/> -->
+	<bean id="PropertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+		<property name="locations">  
+			<list> 
+				<!--读取src目录的db.properties文件--> 
+				<value>classpath:db.properties</value>  
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 配置数据源 -->
+ 	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="${jdbc.driver}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="initialSize" value="1" />
+		<property name="minIdle" value="1" /> 
+		<property name="maxActive" value="20" />
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	    <property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<!-- 将 sqlSessionFactory 交个 Spring 管理 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		 <!-- 加载 mapper.xml 文件 --> 
+		<property name="mapperLocations">
+			<array>
+				<value>top/zero3737/dao/*.xml</value>
+			</array>
+		</property>
+		<!-- 加载 mybatis 配置文件 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+		<!-- 扫描包，自动生成动态代理对象 -->
+		<property name="basePackage" value="top.zero3737.dao"></property>
+	</bean>
+	
+	<!-- 文件上传配置 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8"></property>
+		<property name="maxUploadSize" value="-1"></property>
+	</bean>
+	
+</beans>

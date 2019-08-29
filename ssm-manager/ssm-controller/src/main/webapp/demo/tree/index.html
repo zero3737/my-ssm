@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="./eleTree/eleTree.css" media="all">
+</head>
+<body>
+    <div class="eleTree ele1" lay-filter="data1"></div>
+    <script src="./layui/layui.js"></script>
+    <script src="https://cdn.bootcss.com/axios/0.19.0/axios.js"></script>
+    <script>
+        function replaceAttr(obj, newAttr, oldAttr) {
+
+            obj[newAttr] = obj[oldAttr];
+            delete obj[oldAttr];
+
+            return obj;
+
+        }
+        function afterClassify (element) {
+
+            replaceAttr(element, "label", "name");
+            if(element.isParentId === 1) {
+
+                element.isParentId = false;
+
+            }else {
+
+                element.isParentId = true;
+
+            }
+            replaceAttr(element, "isLeaf", "isParentId");
+
+        }
+    </script>
+    <script>
+        onload = function () {
+
+            axios.get('/ssm-controller/classify')
+            .then(function (response) {
+
+                // json 数据初始化
+                response.data.forEach(element => {
+
+                    afterClassify(element);
+
+                });
+
+                return {
+
+                    elem: '.ele1',
+                    data: response.data,
+                    // 懒加载
+                    lazy: true,
+                    // lazy 为 true 时生效
+                    load: function(data, callback) {
+
+                        axios.get('/ssm-controller/classify', {
+
+                            params : {
+
+                                index: data.id
+
+                            }
+
+                        })
+                        .then(function(response) {
+
+                            let data;
+
+                            (data = response.data).forEach(element => {
+
+                                afterClassify(element);
+                                
+                            });
+                            callback(data);
+
+                        })
+                        .catch(function() {
+
+                            console.log(error);
+
+                        });
+                        
+                    }
+
+                };
+
+            })
+            // 加载 eleTree 插件配置
+            .then(function(obj) {
+
+                layui.config({
+
+                    base: "./layui/lay/mymodules/"
+
+                }).use(['jquery', 'eleTree'], function(){
+
+                    var $ = layui.jquery;
+                    var eleTree = layui.eleTree;
+                    var el1=eleTree.render(obj);
+
+                });
+
+            })
+            .catch(function (error) {
+
+                console.log(error);
+
+            });
+
+        }
+    </script>
+</body>
+</html>

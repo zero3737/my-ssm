@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui/css/layui.css">
+</head>
+
+<body>
+    <div id="editor"></div>
+    <button type="button" class="layui-btn" id="_submit">提交</button>
+    <div id="content"></div>
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://www.layuicdn.com/layui/layui.js"></script>
+    <script src="https://cdn.bootcss.com/wangEditor/10.0.13/wangEditor.js"></script>
+    <script src="https://cdn.bootcss.com/axios/0.19.0/axios.min.js"></script>
+    <!-- 初始化分文本编辑器 -->
+    <script type="text/javascript">
+        var E = window.wangEditor
+        var editor = new E('#editor')
+        editor.customConfig.uploadImgShowBase64 = true
+        editor.create()
+    </script>
+    <!-- 初始化 layui 配置 -->
+    <script>
+        layui.use(['layer'], function () {
+
+            layer = layui.layer;
+
+        });   
+    </script>
+    <script>
+        $(function () {
+
+            axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+
+            $("#_submit").click(function () {
+
+                axios.post('/ssm-controller/content', {
+
+                    htmlContent: editor.txt.html()
+
+                })
+                    .then(function (response) {
+
+                        let _data = response.data;
+                        if (_data.code === 1) {
+
+                            layer.msg(_data.msg);
+                            $("#content").append(JSON.parse(_data.bean.content).htmlContent);
+
+                        }
+
+                    })
+                    .catch(function (error) {
+
+                        console.log(error);
+
+                    });
+
+            });
+
+        });
+    </script>
+</body>
+
+</html>
