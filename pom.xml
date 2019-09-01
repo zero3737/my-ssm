@@ -142,5 +142,13 @@
 	    <scope>compile</scope>
 	</dependency>
 
+	<!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+	<dependency>
+	    <groupId>redis.clients</groupId>
+	    <artifactId>jedis</artifactId>
+	    <version>3.0.1</version>
+	</dependency>
+
+
   </dependencies>
 </project>

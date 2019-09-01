@@ -5,7 +5,7 @@ import org.junit.Test;
 public class HttpClientServiceTest {
 
 	@Test
-	public void testDoGet() throws Exception {
+	public void testDoPost() throws Exception {
 		
 		new HttpClientService().doPost();
 		
