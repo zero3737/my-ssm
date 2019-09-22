@@ -60,6 +60,8 @@
 				<value>top/zero3737/dao/*.xml</value>
 			</array>
 		</property>
+		<!-- 批量定义别名 -->
+		<property name="typeAliasesPackage" value="top.zero3737.entity"></property>
 		<!-- 加载 mybatis 配置文件 -->
 		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
 	</bean>
@@ -104,6 +106,35 @@
 	    <constructor-arg name="host" value="127.0.0.1"></constructor-arg>
 	    <constructor-arg name="port" value="6379"></constructor-arg>
 	    <constructor-arg name="poolConfig" ref="jedisPoolConfig"></constructor-arg>
+	</bean>
+	
+	<!-- 配置 Shiro 数据源 -->
+	<bean id="IniRealm" class="org.apache.shiro.realm.text.IniRealm">
+		<constructor-arg name="resourcePath" value="classpath:shiro.ini"></constructor-arg>
+	</bean>
+	
+	<!-- 读取数据源 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="IniRealm"></property>
+	</bean>
+	
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager"></property>
+		<!-- 定义没有通过验证的跳转页面，即登陆页面。默认的是webroot下的login.jsp页面 -->
+		<property name="loginUrl" value="/demo/login/login.html"></property>
+		<!-- 定义验证通过的跳转页面 -->
+		<property name="successUrl" value="/demo/login/index.html"></property>
+		<!-- 经过认证但是没有相应的权限时跳转的页面（权限不足） -->
+		<property name="unauthorizedUrl" value="/demo/login/error.html"></property>
+		<!-- 定义资源访问规则 -->
+		<property name="filterChainDefinitions">
+			<value>
+				/demo/login/login.html = anon
+				/demo/** = authc
+				/role = authc, roles[admin]
+				/menu/** = authc, roles[admin], perms[menu:*]
+			</value>
+		</property>
 	</bean>
 	
 </beans>
